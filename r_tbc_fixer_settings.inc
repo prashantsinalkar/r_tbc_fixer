@@ -1,6 +1,6 @@
 <?php
 // $Id$
-function textbook_companion_fixer_settings_form($form,&$form_state)
+function r_tbc_fixer_settings_form($form,&$form_state)
 {
 	$form['to_emails'] = array(
 		'#type' => 'textfield',
@@ -9,7 +9,7 @@ function textbook_companion_fixer_settings_form($form,&$form_state)
 		'#size' => 50,
 		'#maxlength' => 255,
 		'#required' => TRUE,
-		'#default_value' => variable_get('textbook_companion_fixer_to_emails', '')
+		'#default_value' => variable_get('r_tbc_fixer_to_emails', '')
 	);
 	$form['bcc_emails'] = array(
 		'#type' => 'textfield',
@@ -18,7 +18,7 @@ function textbook_companion_fixer_settings_form($form,&$form_state)
 		'#size' => 50,
 		'#maxlength' => 255,
 		'#required' => TRUE,
-		'#default_value' => variable_get('textbook_companion_fixer_bcc_emails', '')
+		'#default_value' => variable_get('r_tbc_fixer_bcc_emails', '')
 	);
 	$form['cc_emails'] = array(
 		'#type' => 'textfield',
@@ -27,7 +27,7 @@ function textbook_companion_fixer_settings_form($form,&$form_state)
 		'#size' => 50,
 		'#maxlength' => 255,
 		'#required' => TRUE,
-		'#default_value' => variable_get('textbook_companion_fixer_cc_emails', '')
+		'#default_value' => variable_get('r_tbc_fixer_cc_emails', '')
 	);
 	$form['from_email'] = array(
 		'#type' => 'textfield',
@@ -36,7 +36,7 @@ function textbook_companion_fixer_settings_form($form,&$form_state)
 		'#size' => 50,
 		'#maxlength' => 255,
 		'#required' => TRUE,
-		'#default_value' => variable_get('textbook_companion_fixer_from_email', '')
+		'#default_value' => variable_get('r_tbc_fixer_from_email', '')
 	);
 
 	$form['submit'] = array(
@@ -45,14 +45,14 @@ function textbook_companion_fixer_settings_form($form,&$form_state)
 	);
 	return $form;
 }
-function textbook_companion_fixer_settings_form_validate($form, &$form_state)
+function r_tbc_fixer_settings_form_validate($form, &$form_state)
 {
 	return;
 }
-function textbook_companion_fixer_settings_form_submit($form, &$form_state)
+function r_tbc_fixer_settings_form_submit($form, &$form_state)
 {
-	variable_set('textbook_companion_fixer_to_emails', $form_state['values']['to_emails']);
-	variable_set('textbook_companion_fixer_bcc_emails', $form_state['values']['bcc_emails']);
-	variable_set('textbook_companion_fixer_cc_emails', $form_state['values']['cc_emails']);
-	variable_set('textbook_companion_fixer_from_email', $form_state['values']['from_email']);
+	variable_set('r_tbc_fixer_to_emails', $form_state['values']['to_emails']);
+	variable_set('r_tbc_fixer_bcc_emails', $form_state['values']['bcc_emails']);
+	variable_set('r_tbc_fixer_cc_emails', $form_state['values']['cc_emails']);
+	variable_set('r_tbc_fixer_from_email', $form_state['values']['from_email']);
 }

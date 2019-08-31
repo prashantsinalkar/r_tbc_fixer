@@ -1,7 +1,7 @@
 (function($) {
 	$(document).ready(function() {
 		var basePath = Drupal.settings.basePath;
-		var modPath = basePath + "textbook_companion_fixer/";
+		var modPath = basePath + "r_tbc_fixer/";
 		var modPath1 = basePath + "textbook_companion_fixer/aicte/book/";
 		$category = $("#fix-tbc-form #edit-category");
 		$book = $("#fix-tbc-form #edit-book");
@@ -42,39 +42,6 @@
 		$(".example-code-edit").hide();
 		$(".well").hide();
 		$(".update-button").hide();
-		$category.change(function() {
-			reset("book", "chapter", "example", "caption");
-			var category_id = $(this).val();
-			if (category_id < 1) {
-				$(".select-book").hide();
-				$(".select-chapter").hide();
-				$(".enter-chapter-name").hide();
-				$(".select-example").hide();
-				$(".enter-caption").hide();
-				$(".chapter-example-chk").hide();
-				$(".example-code-edit").hide();
-				(".well").hide();
-				$(".update-button").hide();
-			} else {
-				$(".select-book").show();
-				$(".select-chapter").hide();
-				$(".enter-chapter-name").hide();
-				$(".chapter-example-chk").hide();
-				$(".select-example").hide();
-				$(".enter-caption").hide();
-				$(".example-code-edit").hide();
-				$(".well").hide();
-				$(".update-button").hide();
-			}
-			$.ajax({
-				url: modPath + "ajax/category/" + category_id,
-				type: "POST",
-				dataType: "html",
-				success: function(data) {
-					$book.html(data);
-				}
-			});
-		});
 		$book.change(function() {
 			reset("chapter", "example", "caption");
 			var book_id = $(this).val();
