@@ -2,7 +2,7 @@
 /**
  * Implementation of hook_mail().
  */
-function textbook_companion_fixer_mail($key, &$message, $params)
+function r_tbc_fixer_mail($key, &$message, $params)
 {
 	global $user;
 	$language = $message['language'];
@@ -51,7 +51,7 @@ Caption : ' . $example_data->caption . '
 
 Best Wishes,
 
-Scilab TBC Team,
+R TBC Team,
 FOSSEE, IIT Bombay', array(
 					'!site_name' => variable_get('site_name', ''),
 					'!user_name' => $user_data->name
@@ -91,7 +91,7 @@ Title of the chapter : ' . $chapter_data->name . '
 
 Best Wishes,
 
-Scilab TBC Team,
+R TBC Team,
 FOSSEE, IIT Bombay', array(
 					'!site_name' => variable_get('site_name', ''),
 					'!user_name' => $user_data->name
@@ -140,7 +140,7 @@ Caption : ' . $example_data->caption . '
 
 Best Wishes,
 
-Scilab TBC Team,
+R TBC Team,
 FOSSEE, IIT Bombay', array(
 					'!site_name' => variable_get('site_name', ''),
 					'!user_name' => $user_data->name
@@ -189,7 +189,7 @@ Sub category : '. $sub_category_data->subcategory .'
 
 Best Wishes,
 
-Scilab TBC Team,
+R TBC Team,
 FOSSEE, IIT Bombay', array(
 					'!site_name' => variable_get('site_name', ''),
 					'!user_name' => $user_data->name
@@ -238,7 +238,7 @@ Sub category : '. $sub_category_data->subcategory .'
 
 Best Wishes,
 
-Scilab TBC Team,
+R TBC Team,
 FOSSEE, IIT Bombay', array(
 					'!site_name' => variable_get('site_name', ''),
 					'!user_name' => $user_data->name
@@ -280,7 +280,7 @@ Main category : '. $main_category_data->maincategory .'
 
 Best Wishes,
 
-Scilab TBC Team,
+R TBC Team,
 FOSSEE, IIT Bombay', array(
 					'!site_name' => variable_get('site_name', ''),
 					'!user_name' => $user_data->name

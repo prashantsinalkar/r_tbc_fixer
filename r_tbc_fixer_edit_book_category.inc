@@ -1,5 +1,5 @@
 <?php
-function textbook_companion_fixer_edit_book_proposal_all()
+function r_tbc_fixer_edit_book_proposal_all()
 {
 	//get the book count
 	$result = db_query("SELECT COUNT( pe.book ) AS book_count FROM {textbook_companion_preference} pe LEFT JOIN {textbook_companion_proposal} po ON pe.proposal_id = po.id WHERE po.proposal_status =3 AND pe.approval_status =1 AND pe.category>0");
@@ -15,9 +15,9 @@ function textbook_companion_fixer_edit_book_proposal_all()
 		$proposal_rows[] = array(
 			$i,
 			"{$preference_data->book} <br> <em>by {$preference_data->author}</em>",
-			_textbook_companion_fixer_list_of_category($preference_data->existing_category),
+			_r_tbc_fixer_list_of_category($preference_data->existing_category),
 			_tbc_fixer_list_of_new_category($preference_data->pref_id),
-			l('Edit', 'textbook_companion_fixer/category_edit/' . $preference_data->pref_id)
+			l('Edit', 'r_tbc_fixer/category_edit/' . $preference_data->pref_id)
 		);
 		$i++;
 	} //$proposal_data = $proposal_q->fetchObject()
@@ -44,7 +44,7 @@ function textbook_companion_fixer_edit_book_proposal_all()
 /******************************************************************************/
 /**************************** CATEGORY EDIT FORM ******************************/
 /******************************************************************************/
-function textbook_companion_fixer_category_edit_form($form, &$form_state)
+function r_tbc_fixer_category_edit_form($form, &$form_state)
 {
 	/* get current proposal */
 	$preference_id = arg(2);
@@ -99,14 +99,14 @@ function textbook_companion_fixer_category_edit_form($form, &$form_state)
 		'#markup' => '<input class="prefrence_id" type="hidden" name="pref_id" value="' . $preference_data->id . '">'
 	);
 	$form["wrapper"]['main_category'] = array(
-		"#markup" => _textbook_companion_fixer_list_of_category_checkboxes()
+		"#markup" => _r_tbc_fixer_list_of_category_checkboxes()
 	);
 	$form["wrapper"]['back'] = array(
-		'#markup' => l(t('Back'), 'textbook_companion_fixer/edit_book_category')
+		'#markup' => l(t('Back'), 'r_tbc_fixer/edit_book_category')
 	);
 	return $form;
 }
-function textbook_companion_fixer_edit_book_category_ajax()
+function r_tbc_fixer_edit_book_category_ajax()
 {
 	global $user;
 	$data = "";
@@ -132,8 +132,8 @@ function textbook_companion_fixer_edit_book_category_ajax()
 			/* sending email */
 		$email_to = $user->mail;
 		$from = variable_get('textbook_companion_from_email', '');
-		$bcc = variable_get('textbook_companion_fixer_bcc_emails', '');
-		$cc = variable_get('textbook_companion_fixer_cc_emails', '');
+		$bcc = variable_get('r_tbc_fixer_bcc_emails', '');
+		$cc = variable_get('r_tbc_fixer_cc_emails', '');
 		$params['category_updated']['pref_id'] = $_POST['pref_id'];
 		$params['category_updated']['main_category'] = $main_category;
 		$params['category_updated']['sub_category'] = $sub_category;
@@ -147,7 +147,7 @@ function textbook_companion_fixer_edit_book_category_ajax()
 			'Cc' => $cc,
 			'Bcc' => $bcc
 		);
-		if (!drupal_mail('textbook_companion_fixer', 'new_category_updated', $email_to, language_default(), $params, $from, TRUE)) {
+		if (!drupal_mail('r_tbc_fixer', 'new_category_updated', $email_to, language_default(), $params, $from, TRUE)) {
 			$data .= 'Error sending email message.';
 		}
 		} //$_POST['action'] == "add"
@@ -165,8 +165,8 @@ WHERE pref_id= :pref_id AND main_category= :main_category AND sub_category = :su
 			/* sending email */
 		$email_to = $user->mail;
 		$from = variable_get('textbook_companion_from_email', '');
-		$bcc = variable_get('textbook_companion_fixer_bcc_emails', '');
-		$cc = variable_get('textbook_companion_fixer_cc_emails', '');
+		$bcc = variable_get('r_tbc_fixer_bcc_emails', '');
+		$cc = variable_get('r_tbc_fixer_cc_emails', '');
 		$params['subcategory_deleted']['pref_id'] = $_POST['pref_id'];
 		$params['subcategory_deleted']['main_category'] = $main_category;
 		$params['subcategory_deleted']['sub_category'] = $sub_category;
@@ -180,7 +180,7 @@ WHERE pref_id= :pref_id AND main_category= :main_category AND sub_category = :su
 			'Cc' => $cc,
 			'Bcc' => $bcc
 		);
-		if (!drupal_mail('textbook_companion_fixer', 'new_subcategory_deleted', $email_to, language_default(), $params, $from, TRUE)) {
+		if (!drupal_mail('r_tbc_fixer', 'new_subcategory_deleted', $email_to, language_default(), $params, $from, TRUE)) {
 			$data .= 'Error sending email message.';
 		}
 		} //$_POST['action'] == "delete"
@@ -197,8 +197,8 @@ WHERE pref_id= :pref_id AND main_category= :main_category
 					/* sending email */
 		$email_to = $user->mail;
 		$from = variable_get('textbook_companion_from_email', '');
-		$bcc = variable_get('textbook_companion_fixer_bcc_emails', '');
-		$cc = variable_get('textbook_companion_fixer_cc_emails', '');
+		$bcc = variable_get('r_tbc_fixer_bcc_emails', '');
+		$cc = variable_get('r_tbc_fixer_cc_emails', '');
 		$params['maincategory_deleted']['pref_id'] = $_POST['pref_id'];
 		$params['maincategory_deleted']['main_category'] = $main_category;
 		$params['maincategory_deleted']['user_id'] = $user->uid;
@@ -211,7 +211,7 @@ WHERE pref_id= :pref_id AND main_category= :main_category
 			'Cc' => $cc,
 			'Bcc' => $bcc
 		);
-		if (!drupal_mail('textbook_companion_fixer', 'new_maincategory_deleted', $email_to, language_default(), $params, $from, TRUE)) {
+		if (!drupal_mail('r_tbc_fixer', 'new_maincategory_deleted', $email_to, language_default(), $params, $from, TRUE)) {
 			$data .= 'Error sending email message.';
 		}
 		} //$_POST['action'] == "delete-main-with-ub-category"
@@ -251,7 +251,7 @@ function _tbc_fixer_list_of_category($category_id = NULL)
 	} //$category_list_data = $category_list->fetchObject()
 	return $category;
 }
-function _textbook_companion_fixer_list_of_category($category_id)
+function _r_tbc_fixer_list_of_category($category_id)
 {
 	$category .= "";
 	$query = db_select('list_of_category');
@@ -324,7 +324,7 @@ function _tbc_fixer_list_of_ext_new_category($pref_id, $category_id)
 	} //$category_list_data = $category_list->fetchObject()
 	return $category;
 }
-function _textbook_companion_fixer_list_of_category_checkboxes()
+function _r_tbc_fixer_list_of_category_checkboxes()
 {
 	$pref_id = arg(2);
 	$query = db_select('list_of_category');
@@ -348,7 +348,7 @@ function _textbook_companion_fixer_list_of_category_checkboxes()
     <th>Selected sub categories</th>
   </tr>
   <tr>
-    <td rowspan='3'><select id='subcats-" . $category_list_data->category_id . "' name='subcats' class='main-subcategory' size='10'  multiple name='subcat' data-cid='" . $category_list_data->category_id . "'>" . _textbook_companion_fixer_list_of_subcategory($pref_id, $category_list_data->category_id) . "</select>
+    <td rowspan='3'><select id='subcats-" . $category_list_data->category_id . "' name='subcats' class='main-subcategory' size='10'  multiple name='subcat' data-cid='" . $category_list_data->category_id . "'>" . _r_tbc_fixer_list_of_subcategory($pref_id, $category_list_data->category_id) . "</select>
     <a href='JavaScript:void(0);' id='btn-add' class='select-main-subcategory-" . $category_list_data->category_id . "' data-cid='" . $category_list_data->category_id . "'>Add &raquo;</a>
     </td>
     <td rowspan='3'><a href='JavaScript:void(0);' id='btn-remove' class='select-main-subcategory-" . $category_list_data->category_id . "'data-cid='" . $category_list_data->category_id . "'>&laquo; Remove</a>
@@ -361,7 +361,7 @@ function _textbook_companion_fixer_list_of_category_checkboxes()
 	} //$category_list_data = $category_list->fetchObject()
 	return $category;
 }
-function _textbook_companion_fixer_list_of_subcategory($pref_id, $category_id)
+function _r_tbc_fixer_list_of_subcategory($pref_id, $category_id)
 {
 	$query = "
                 SELECT los.subcategory_id as subcat_id,los.subcategory as sub_category 
