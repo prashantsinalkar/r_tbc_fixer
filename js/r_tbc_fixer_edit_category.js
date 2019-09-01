@@ -3,7 +3,7 @@
 		var basePath = Drupal.settings.basePath;
 		//var modPath = basePath + "textbook_companion_fixer/";
 		var modPath = basePath +
-			"textbook_companion_fixer/ajax/edit-book-category/";
+			"r_tbc_fixer/ajax/edit-book-category/";
 		$category_form = $("#fix-tbc-category-form");
 		$(".main-subcategory-table-div").hide();
 

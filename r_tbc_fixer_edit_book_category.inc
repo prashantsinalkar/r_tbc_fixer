@@ -2,20 +2,20 @@
 function r_tbc_fixer_edit_book_proposal_all()
 {
 	//get the book count
-	$result = db_query("SELECT COUNT( pe.book ) AS book_count FROM {textbook_companion_preference} pe LEFT JOIN {textbook_companion_proposal} po ON pe.proposal_id = po.id WHERE po.proposal_status =3 AND pe.approval_status =1 AND pe.category>0");
+	$result = db_query("SELECT COUNT( pe.book ) AS book_count FROM {textbook_companion_preference} pe LEFT JOIN {textbook_companion_proposal} po ON pe.proposal_id = po.id WHERE pe.approval_status =1 ");
 	$row = $result->fetchObject();
 	$book_count = $row->book_count;
 	$i = 1;
 	/* get preference */
-	$preference_q = db_query("SELECT pe.id as pref_id, pe.book as book, pe.author as author,pe.category as existing_category, pe.publisher as publisher, pe.year as year, pe.id as pe_id, po.approval_date as approval_date
+	$preference_q = db_query("SELECT pe.id as pref_id, pe.book as book, pe.author as author, pe.publisher as publisher, pe.year as year, pe.id as pe_id, po.approval_date as approval_date, po.proposal_status
   FROM {textbook_companion_preference} pe LEFT JOIN {textbook_companion_proposal} po ON pe.proposal_id = po.id
-  WHERE po.proposal_status = 3 AND pe.approval_status = 1 AND pe.category>0 ORDER BY pe.book ASC");
+  WHERE pe.approval_status = 1 ORDER BY po.proposal_status ASC");
 	while ($preference_data = $preference_q->fetchObject())
 	{
 		$proposal_rows[] = array(
 			$i,
 			"{$preference_data->book} <br> <em>by {$preference_data->author}</em>",
-			_r_tbc_fixer_list_of_category($preference_data->existing_category),
+			 get_proposal_status($preference_data->proposal_status),
 			_tbc_fixer_list_of_new_category($preference_data->pref_id),
 			l('Edit', 'r_tbc_fixer/category_edit/' . $preference_data->pref_id)
 		);
@@ -27,12 +27,12 @@ function r_tbc_fixer_edit_book_proposal_all()
 		drupal_set_message(t('There are no proposals.'), 'status');
 		return '';
 	} //!$proposal_rows
-	$output .= "Book count with category: " . $book_count;
+	$output = "Book count: " . $book_count;
 	$proposal_header = array(
 		'No.',
 		'Title of the Book',
-		'Existing Category',
-		'New Category',
+		'Proposal Status',
+		'Current Category',
 		'Action'
 	);
 	$output .= theme('table', array(
@@ -40,6 +40,35 @@ function r_tbc_fixer_edit_book_proposal_all()
 		'rows' => $proposal_rows
 	));
 	return $output;
+}
+
+function get_proposal_status($proposal_value)
+{
+        $proposal_status = '';
+        switch ($proposal_value) {
+            case 0:
+                $proposal_status = "<span style='color:#FFFFFF'>Pending</span>";
+                break;
+            case 1:
+                $proposal_status = "<span style='color:#FF0000'>Approved</span>";
+                break;
+            case 2:
+                $proposal_status = "<span style='color:#00FF00'>Dis-approved</span>";
+                break;
+            case 3:
+                $proposal_status = "<span style='color:#0000FF'>Completed</span>";
+                break;
+            case 4:
+                $proposal_status = "<span style='color:#0000FF'>External</span>";
+                break;
+            case 5:
+                $proposal_status = "<span style='color:#800080'>Submitted all codes</span>";
+                break;
+            default:
+                $proposal_status = "<span style='color:#808000'>Unknown</span>";
+                break;
+        }
+        return $proposal_status;
 }
 /******************************************************************************/
 /**************************** CATEGORY EDIT FORM ******************************/
