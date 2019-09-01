@@ -1,0 +1,6 @@
+name = "R Textbook Companion fixer"
+description = "Module to fix R code bugs"
+version = "7.1.1"
+core = "7.x"
+package = IITB
+

@@ -1,0 +1,472 @@
+<?php
+require_once('r_tbc_fixer_email.inc');
+include('r_tbc_fixer_edit_book_category.inc');
+function r_tbc_fixer_menu()
+{
+	$items = array();
+	$items["r_tbc_fixer/caption"] = array(
+		"title" => "Edit TBC captions",
+		"page callback" => "R_fixer_caption_all",
+		"access arguments" => array(
+			"fix R_code_caption"
+		),
+		"type" => MENU_NORMAL_ITEM
+	);
+	$items["r_tbc_fixer/code"] = array(
+		"title" => "Edit TBC code",
+		"page callback" => "R_fixer_code_all",
+		"access arguments" => array(
+			"fix R"
+		),
+		"type" => MENU_NORMAL_ITEM
+	);
+	$items["r_tbc_fixer/ajax"] = array(
+		"page callback" => "R_fixer_ajax",
+		"access callback" => TRUE,
+		"type" => MENU_CALLBACK
+	);
+	$items["r_tbc_fixer/ajax/edit-book-category"] = array(
+		"page callback" => "r_tbc_fixer_edit_book_category_ajax",
+		"access callback" => TRUE,
+		"type" => MENU_CALLBACK,
+		"file" => "r_tbc_fixer_edit_book_category.inc"
+	);
+	/* for admin */
+	$items['admin/settings/r_tbc_fixer_settings'] = array(
+		'title' => 'textbook companion fixer Settings',
+		'description' => 'Textbook Companion Fixer Settings',
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array(
+			'r_tbc_fixer_settings_form'
+		),
+		'access arguments' => array(
+			'administer textbook companion fixer settings'
+		),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'r_tbc_fixer_settings.inc'
+	);
+	// edit book categoery
+	$items["r_tbc_fixer/edit_book_category"] = array(
+		"title" => "Edit Books Category",
+		"page callback" => "r_tbc_fixer_edit_book_proposal_all",
+		"access arguments" => array(
+			"fix R_textbook_category"
+		),
+		"type" => MENU_NORMAL_ITEM,
+		'file' => 'r_tbc_fixer_edit_book_category.inc'
+	);
+	$items['r_tbc_fixer/category_edit'] = array(
+		'title' => 'Categorize',
+		'description' => 'Edit Completed Books Category',
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array(
+			'r_tbc_fixer_category_edit_form'
+		),
+		'access arguments' => array(
+			'fix R_textbook_category'
+		),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'r_tbc_fixer_edit_book_category.inc'
+	);
+	return $items;
+}
+function r_tbc_fixer_permission()
+{
+	return array(
+		"fix R" => array(
+			"title" => t("fix R code"),
+			'restrict access' => TRUE
+		),
+		"fix R_code_caption" => array(
+			"title" => t("fix R code caption"),
+			'restrict access' => TRUE
+		),
+		"administer textbook companion fixer settings" => array(
+			"title" => t("administer textbook companion fixer settings"),
+			'restrict access' => TRUE
+		),
+		"fix R_textbook_category" => array(
+			"title" => t("fix R textbook category"),
+			'restrict access' => TRUE
+		)
+	);
+}
+
+function R_fixer_caption_form($form, &$form_state)
+{
+	$form = array();
+	$form["wrapper"] = array(
+		"#type" => "fieldset",
+		"#title" => "Caption change form",
+		"#prefix" => "<div id='fix-tbc-form'>",
+		"#suffix" => "</div>"
+	);
+	$form["wrapper"]["book"] = array(
+		"#type" => "select",
+		"#title" => t("Please select the book."),
+		"#options" => r_get_tbc_books(),
+	);
+	$form["wrapper"]["chapter"] = array(
+		"#type" => "select",
+		"#title" => t("Please select the chapter"),
+		"#options" => array(
+			0 => "Please select a chapter"
+		),
+		"#prefix" => "<div class='select-chapter'>",
+		"#suffix" => "</div>"
+	);
+	$form["wrapper"]["chapter_name"] = array(
+		"#type" => "textfield",
+		"#title" => t("Enter new chapter name"),
+		"#size" => 255,
+		"#maxlength" => 255,
+		"#attributes" => array(
+			"Style" => "width:100%"
+		),
+		"#prefix" => "<div class='enter-chapter-name'>",
+		"#suffix" => "</div>"
+	);
+	$form["wrapper"]["example"] = array(
+		"#type" => "select",
+		"#title" => t("Please select the example"),
+		"#description" => t("<span style='color:red'>*Double click on example caption you want to edit</span>"),
+		"#options" => array(
+			0 => "Please select a example"
+		),
+		"#prefix" => "<div class='select-example'>",
+		"#suffix" => "</div>"
+	);
+	$form["wrapper"]["caption"] = array(
+		"#type" => "textfield",
+		"#title" => t("Enter new caption"),
+		"#attributes" => array(
+			"Style" => "width:100%"
+		),
+		"#size" => 255,
+		"#maxlength" => 255,
+		"#prefix" => "<div class='enter-caption'>",
+		"#suffix" => "</div>"
+	);
+	$form["wrapper"]["chapter_example"] = array(
+		"#markup" => "<input type='checkbox' name='chapterchk' value='chapter' class='chapter-caption-chk'>
+						Update Chapter caption</input><br>
+					<input type='checkbox' name='examplechk' value='example' class='example-caption-chk'>
+					Update Example caption</input>",
+		"#prefix" => "<div class='chapter-example-chk'>",
+		"#suffix" => "</div>"
+	);
+	$form["wrapper"]["submit"] = array(
+		"#type" => "submit",
+		"#value" => "Update",
+		"#prefix" => "<div class='update-button'>",
+		"#suffix" => "</div>"
+	);
+	$form["wrapper"]["code_wrapper"] = array(
+		"#type" => "fieldset",
+		"#description" => t("No code to display"),
+		"#attributes" => array(
+			"onclick" => "return check();"
+		),
+		"#prefix" => "<div class='well'><pre id='edit-code' class='fix-caption-code'>",
+		"#suffix" => "</pre></div>"
+	);
+	return $form;
+}
+
+function R_fixer_caption_all()
+{
+	$page_content = "";
+	$page_content .= "<div id='fix-tbc-page'>";
+	$page_content .= "<center><span id='updating'>Updating...</span></center>";
+	$page_content .= "<span id='done'>Done.</span>";
+	$R_fixer_caption_form = drupal_get_form("R_fixer_caption_form");
+	$page_content .= drupal_render($R_fixer_caption_form);
+	$page_content .= "</div>";
+	$page_content .= "<small>* Selecting text from above code-area with mouse will add it to the caption textbox.</small>";
+	return $page_content;
+}
+
+function R_fixer_ajax($item, $key)
+{
+	$data = "";
+	global $user;
+	if ($item == "category" && $key) {
+		/* $query = "
+		SELECT pre.id AS id, pre.book, pre.author FROM textbook_companion_preference pre
+		LEFT JOIN textbook_companion_proposal pro ON pro.id = pre.proposal_id
+		WHERE pro.proposal_status = 3 AND pre.approval_status = 1 AND pre.category = %d
+		ORDER BY pre.book ASC
+		";
+		$result = db_query($query, $key);*/
+		$query = db_select('textbook_companion_preference', 'pre');
+		$query->fields('pre', array(
+			'id',
+			'book',
+			'author'
+		));
+		$query->leftJoin('textbook_companion_proposal', 'pro', 'pro.id = pre.proposal_id');
+		$query->condition('pro.proposal_status', 3);
+		$query->condition('pre.approval_status', 1);
+		$query->condition('pre.category', $key);
+		$query->orderBy('pre.book', 'ASC');
+		$result = $query->execute();
+		$data .= "<option value='0'>Please select the book.</option>";
+		while ($row = $result->fetchObject()) {
+			$data .= "<option value='{$row->id}'>{$row->book} ({$row->author})</option>";
+		} //$row = $result->fetchObject()
+	} //$item == "category" && $key
+	else if ($item == "book" && $key) {
+		/*$query = "SELECT * FROM {textbook_companion_chapter} WHERE preference_id = %d ORDER BY number";
+		$result = db_query($query, $key);*/
+		$query = db_select('textbook_companion_chapter');
+		$query->fields('textbook_companion_chapter');
+		$query->condition('preference_id', $key);
+		$query->orderBy('number', 'ASC');
+		$result = $query->execute();
+		$data .= "<option value='0'>Please select the chapter.</option>";
+		while ($row = $result->fetchObject()) {
+			$data .= "<option value='{$row->id}' data-chapterid='{$row->id}' data-chaptername='{$row->name}'>{$row->number}) {$row->name}</option>";
+		} //$row = $result->fetchObject()
+	} //$item == "book" && $key
+	else if ($item == "chapter" && $key) {
+		/*$query = "SELECT * FROM {textbook_companion_example} WHERE chapter_id = %d ORDER BY number";
+		$result = db_query($query, $key);*/
+		$query = db_select('textbook_companion_example');
+		$query->fields('textbook_companion_example');
+		$query->condition('chapter_id', $key);
+		$query->orderBy('number', 'ASC');
+		$result = $query->execute();
+		$data .= "<option value='0'>Please select the example.</option>";
+		while ($row = $result->fetchObject()) {
+			$data .= "<option value='{$row->id}' data-exampleid='{$row->caption}'>{$row->number} {$row->caption}</option>";
+		} //$row = $result->fetchObject()
+	} //$item == "chapter" && $key
+	else if ($item == "example" && $key) {
+
+		$result = db_query("select tcp.directory_name, tce.caption, tcef.filepath from textbook_companion_preference tcp join textbook_companion_chapter tcc on tcp.id=tcc.preference_id join textbook_companion_example tce ON tcc.id=tce.chapter_id join textbook_companion_example_files tcef on tce.id=tcef.example_id where tcef.filetype= 'S' AND tcef.example_id= :example_id", array(
+                ':example_id' => $key
+            ));
+		$row = $result->fetchObject();
+		/* fetching example file data */
+		$uploads_dir = $_SERVER['DOCUMENT_ROOT'] . base_path() . "r_uploads/tbc_uploads/";
+		$example_path = $uploads_dir. $row->directory_name. '/'. $row->filepath;
+		$example = file_get_contents($example_path);
+		$data .= "<div id='caption'>{$row->caption}</div>";
+		$data .= "<div id='code'>{$example}</div>";
+	} //$item == "example" && $key
+	else if ($item == "update-example") {
+		$example_id = $_POST["example_id"];
+		$caption = $_POST["caption"];
+		/*$query = "
+		UPDATE textbook_companion_example
+		SET caption = '%s'
+		WHERE id = %d
+		";
+		$result = db_query($query, $caption, $example_id);*/
+		$query = db_update('textbook_companion_example');
+		$query->fields(array(
+			'caption' => $caption
+		));
+		$query->condition('id', $example_id);
+		$result = $query->execute();
+		$data .= "Updated";
+		/* sending email */
+		$email_to = $user->mail;
+		$from = variable_get('textbook_companion_from_email', '');
+		$bcc = variable_get('r_tbc_fixer_bcc_emails', '');
+		$cc = variable_get('r_tbc_fixer_cc_emails', '');
+		$params['example_updated']['example_id'] = $example_id;
+		$params['example_updated']['user_id'] = $user->uid;
+		$params['example_updated']['headers'] = array(
+			'From' => $from,
+			'MIME-Version' => '1.0',
+			'Content-Type' => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
+			'Content-Transfer-Encoding' => '8Bit',
+			'X-Mailer' => 'Drupal',
+			'Cc' => $cc,
+			'Bcc' => $bcc
+		);
+		if (!drupal_mail('r_tbc_fixer', 'example_updated', $email_to, language_default(), $params, $from, TRUE)) {
+			$data .= 'Error sending email message.';
+		} //!drupal_mail('r_tbc_fixer', 'example_updated', $email_to, language_default(), $params, $from, TRUE)
+	} //$item == "update-example"
+	else if ($item == "update-chapter") {
+		$chapter_id = $_POST["chapter_id"];
+		$chapter_caption = $_POST["chapter_caption"];
+		$query_chapter = db_update('textbook_companion_chapter');
+		$query_chapter->fields(array(
+			'name' => $chapter_caption
+		));
+		$query_chapter->condition('id', $chapter_id);
+		$result_chapter = $query_chapter->execute();
+		$data .= "Updated";
+		/* sending email */
+		$email_to = $user->mail;
+		$from = variable_get('textbook_companion_from_email', '');
+		$bcc = variable_get('r_tbc_fixer_bcc_emails', '');
+		$cc = variable_get('r_tbc_fixer_cc_emails', '');
+		$params['chapter_updated']['chapter_id'] = $chapter_id;
+		$params['chapter_updated']['user_id'] = $user->uid;
+		$params['chapter_updated']['headers'] = array(
+			'From' => $from,
+			'MIME-Version' => '1.0',
+			'Content-Type' => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
+			'Content-Transfer-Encoding' => '8Bit',
+			'X-Mailer' => 'Drupal',
+			'Cc' => $cc,
+			'Bcc' => $bcc
+		);
+		if (!drupal_mail('r_tbc_fixer', 'chapter_updated', $email_to, language_default(), $params, $from, TRUE)) {
+			$data .= 'Error sending email message.';
+		} //!drupal_mail('r_tbc_fixer', 'chapter_updated', $email_to, language_default(), $params, $from, TRUE)
+	} //$item == "update-chapter"
+	else if ($item == "update-both") {
+		$example_id = $_POST["example_id"];
+		$caption = $_POST["caption"];
+		$chapter_id = $_POST["chapter_id"];
+		$chapter_caption = $_POST["chapter_caption"];
+		$query_exmaple = db_update('textbook_companion_example');
+		$query_exmaple->fields(array(
+			'caption' => $caption
+		));
+		$query_exmaple->condition('id', $example_id);
+		$result_example = $query_exmaple->execute();
+		$query_chapter = db_update('textbook_companion_chapter');
+		$query_chapter->fields(array(
+			'name' => $chapter_caption
+		));
+		$query_chapter->condition('id', $chapter_id);
+		$result_chapter = $query_chapter->execute();
+		$data .= "Updated";
+		/* sending email */
+		$email_to = $user->mail;
+		$from = variable_get('textbook_companion_from_email', '');
+		$bcc = variable_get('r_tbc_fixer_bcc_emails', '');
+		$cc = variable_get('r_tbc_fixer_cc_emails', '');
+		$params['example_updated']['example_id'] = $example_id;
+		$params['example_updated']['user_id'] = $user->uid;
+		$params['example_updated']['headers'] = array(
+			'From' => $from,
+			'MIME-Version' => '1.0',
+			'Content-Type' => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
+			'Content-Transfer-Encoding' => '8Bit',
+			'X-Mailer' => 'Drupal',
+			'Cc' => $cc,
+			'Bcc' => $bcc
+		);
+		if (!drupal_mail('r_tbc_fixer', 'chapter_example_updated', $email_to, language_default(), $params, $from, TRUE)) {
+			$data .= 'Error sending email message.';
+		} //!drupal_mail('r_tbc_fixer', 'chapter_example_updated', $email_to, language_default(), $params, $from, TRUE)
+	} //$item == "update"
+	else if ($item == "code" && $key) {
+		$code = $_POST["code"];
+        $result = db_query("select * from textbook_companion_preference tcp join textbook_companion_chapter tcc on tcp.id=tcc.preference_id join textbook_companion_example tce ON tcc.id=tce.chapter_id join textbook_companion_example_files tcef on tce.id=tcef.example_id where tcef.filetype= 'S' AND tcef.example_id= :example_id", array(
+                ':example_id' => $key
+            ));
+		$row = $result->fetchObject();
+		$uploads_dir = $_SERVER['DOCUMENT_ROOT'] . base_path() . "r_uploads/tbc_uploads/";
+		$example_path = $uploads_dir. $row->directory_name. '/'. $row->filepath;
+		file_put_contents($example_path, $code);
+		$data .= "updated";
+	} //$item == "code" && $key
+	else if ($item == "ind-ed" && $key) {
+		$query = "
+                UPDATE textbook_companion_aicte
+                SET ind = !ind
+                WHERE id = :id
+            ";
+		$args = array(
+			":id" => $key
+		);
+		db_query($query, $args);
+		$data .= "updated";
+	} //$item == "ind-ed" && $key
+	else {
+		$data = "<option value='0'>Please select a book</option>";
+	}
+	echo $data;
+	exit();
+}
+
+function R_fixer_code_form($form, &$form_state)
+{
+	$form = array();
+	$form["code_edit"] = array(
+		"#type" => "fieldset",
+		"#title" => "Code edit form",
+		"#prefix" => "<div id='fix-tbc-form'>",
+		"#suffix" => "</div>"
+	);
+	$form["code_edit"]["book"] = array(
+		"#type" => "select",
+		"#title" => t("Please select the book."),
+		"#options" => r_get_tbc_books(),
+	);
+	$form["code_edit"]["chapter"] = array(
+		"#type" => "select",
+		"#title" => t("Please select the chapter"),
+		"#options" => array(
+			0 => "Please select a chapter"
+		),
+		"#prefix" => "<div class='select-chapter'>",
+		"#suffix" => "</div>"
+	);
+	$form["code_edit"]["example"] = array(
+		"#type" => "select",
+		"#title" => t("Please select the example"),
+		"#options" => array(
+			0 => "Please select a example"
+		),
+		"#prefix" => "<div class='select-example'>",
+		"#suffix" => "</div>"
+	);
+	$form["code_edit"]["code"] = array(
+		"#type" => "textarea",
+		"#title" => t("Code Editor"),
+		'#resizable' => FALSE,
+		"#prefix" => "<div class='example-code-edit'>",
+		"#suffix" => "</div>"
+	);
+	$form["code_edit"]["submit"] = array(
+		"#type" => "submit",
+		"#value" => "Update",
+		"#prefix" => "<div class='update-button'>",
+		"#suffix" => "</div>"
+	);
+	return $form;
+}
+function R_fixer_code_all()
+{
+	$page_content = "";
+	$page_content .= "<div id='fix-tbc-page'>";
+	$page_content .= "<center><span id='updating'>Updating...</span></center>";
+	$page_content .= "<span id='done'>Done.</span>";
+	$R_fixer_code_form = drupal_get_form("R_fixer_code_form");
+	$page_content .= drupal_render($R_fixer_code_form);
+	$page_content .= "</div>";
+	return $page_content;
+}
+
+function r_get_tbc_books(){
+    $query = "
+		SELECT pre.id AS id, pre.book, pre.author FROM textbook_companion_preference pre
+		LEFT JOIN textbook_companion_proposal pro ON pro.id = pre.proposal_id
+		WHERE pro.proposal_status = 3 AND pre.approval_status = 1
+		ORDER BY pre.book ASC
+		";
+	$book_list = db_query($query);
+	$book[0] = "Select any book";
+    while ($book_list_data = $book_list->fetchObject())
+	{
+		$book[$book_list_data->id] .= $book_list_data->book ." (by " .$book_list_data->author. ")";
+	} 
+	return $book;
+}
+function r_tbc_fixer_init()
+{
+
+	drupal_add_css(drupal_get_path("module", "r_tbc_fixer") . "/css/r_tbc_fixer.css");
+	drupal_add_js(drupal_get_path("module", "r_tbc_fixer") . "/js/r_tbc_fixer.js");
+	drupal_add_js(drupal_get_path("module", "r_tbc_fixer") . "/js/r_tbc_fixer_edit_category.js");
+	drupal_add_js(drupal_get_path("module", "r_tbc_fixer") . "/js/selection.js");
+}
