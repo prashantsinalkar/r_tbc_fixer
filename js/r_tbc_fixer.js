@@ -1,4 +1,4 @@
-(function($) {
+	(function($) {
 	$(document).ready(function() {
 		var basePath = Drupal.settings.basePath;
 		var modPath = basePath + "r_tbc_fixer/";
@@ -14,6 +14,7 @@
 		$updating = $("#fix-tbc-page #updating");
 		$done = $("#fix-tbc-page #done");
 		$example.attr("multiple", "enabled");
+
 
 		function reset() {
 			for (var i = 0, l = arguments.length; i < l; i++) {
@@ -45,7 +46,7 @@
 		$book.change(function() {
 			reset("chapter", "example", "caption");
 			var book_id = $(this).val();
-			if (book_id < 1) {
+			if (book_id < 0) {
 				$(".select-chapter").hide();
 				$(".select-example").hide();
 				$(".enter-caption").hide();
@@ -100,6 +101,7 @@
 				dataType: "html",
 				success: function(data) {
 					$example.html(data);
+					$example.attr("size", $("#fix-tbc-form #edit-example option").length);
 				}
 			});
 		});
@@ -115,6 +117,7 @@
 				$(".well").hide();
 				$(".update-button").hide();
 			} else {
+
 				$(".enter-caption").show();
 				$("#edit-caption").val(example_name);
 				$(".example-code-edit").show();

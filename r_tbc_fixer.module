@@ -47,7 +47,7 @@ function r_tbc_fixer_menu()
 	);
 	// edit book categoery
 	$items["r_tbc_fixer/edit_book_category"] = array(
-		"title" => "Edit Completed Books Category",
+		"title" => "Edit Books Category",
 		"page callback" => "r_tbc_fixer_edit_book_proposal_all",
 		"access arguments" => array(
 			"fix R_textbook_category"
@@ -243,7 +243,7 @@ function R_fixer_ajax($item, $key)
 	} //$item == "chapter" && $key
 	else if ($item == "example" && $key) {
 
-		$result = db_query("select * from textbook_companion_preference tcp join textbook_companion_chapter tcc on tcp.id=tcc.preference_id join textbook_companion_example tce ON tcc.id=tce.chapter_id join textbook_companion_example_files tcef on tce.id=tcef.example_id where tcef.filetype= 'S' AND tcef.example_id= :example_id", array(
+		$result = db_query("select tcp.directory_name, tce.caption, tcef.filepath from textbook_companion_preference tcp join textbook_companion_chapter tcc on tcp.id=tcc.preference_id join textbook_companion_example tce ON tcc.id=tce.chapter_id join textbook_companion_example_files tcef on tce.id=tcef.example_id where tcef.filetype= 'S' AND tcef.example_id= :example_id", array(
                 ':example_id' => $key
             ));
 		$row = $result->fetchObject();
@@ -458,12 +458,13 @@ function r_get_tbc_books(){
 	$book[0] = "Select any book";
     while ($book_list_data = $book_list->fetchObject())
 	{
-		$book[$book_list_data->id] .= $book_list_data->book;
+		$book[$book_list_data->id] .= $book_list_data->book ." (by " .$book_list_data->author. ")";
 	} 
 	return $book;
 }
 function r_tbc_fixer_init()
 {
+
 	drupal_add_css(drupal_get_path("module", "r_tbc_fixer") . "/css/r_tbc_fixer.css");
 	drupal_add_js(drupal_get_path("module", "r_tbc_fixer") . "/js/r_tbc_fixer.js");
 	drupal_add_js(drupal_get_path("module", "r_tbc_fixer") . "/js/r_tbc_fixer_edit_category.js");
