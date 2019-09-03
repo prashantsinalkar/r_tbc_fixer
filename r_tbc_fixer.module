@@ -456,9 +456,9 @@ function r_get_tbc_books(){
 		";
 	$book_list = db_query($query);
 	$book[0] = "Select any book";
-    while ($book_list_data = $book_list->fetchObject())
+	while ($book_list_data = $book_list->fetchObject())
 	{
-		$book[$book_list_data->id] .= $book_list_data->book ." (by " .$book_list_data->author. ")";
+		$book[$book_list_data->id] = $book[$book_list_data->id]. $book_list_data->book ." (by " .$book_list_data->author. ")";
 	} 
 	return $book;
 }

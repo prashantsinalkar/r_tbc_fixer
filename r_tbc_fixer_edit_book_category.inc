@@ -140,8 +140,8 @@ function r_tbc_fixer_edit_book_category_ajax()
 	global $user;
 	$data = "";
 	$item = arg(2);
-	$main_category = $_POST['main_category'];
-	$sub_category = $_POST['sub_category'];
+	$main_category = trim($_POST['main_category']);
+	$sub_category = trim($_POST['sub_category']);
 	if ($item == "edit-book-category")
 	{
 		if ($_POST['action'] == "add")
@@ -361,6 +361,7 @@ function _r_tbc_fixer_list_of_category_checkboxes()
 	//$query->fields(array('category_id','main_category'));
 	$query->orderBy('category_id', 'ASC');
 	$category_list = $query->execute();
+	$category = "";
 	while ($category_list_data = $category_list->fetchObject())
 	{
 		$categoryname = $category_list_data->maincategory;
@@ -405,6 +406,7 @@ function _r_tbc_fixer_list_of_subcategory($pref_id, $category_id)
 		':category_id' => $category_id
 	);
 	$subcategory_list = db_query($query, $args);
+	$subcategory = "";
 	while ($subcategory_list_data = $subcategory_list->fetchObject())
 	{
 		$subcategory .= "<option value='" . $subcategory_list_data->subcat_id . "' data-name='" . $subcategory_list_data->sub_category . "' data-mcid='" . $category_id . "'>" . $subcategory_list_data->sub_category . "</option>";
