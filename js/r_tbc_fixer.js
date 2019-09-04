@@ -2,15 +2,13 @@
 	$(document).ready(function() {
 		var basePath = Drupal.settings.basePath;
 		var modPath = basePath + "r_tbc_fixer/";
-		var modPath1 = basePath + "textbook_companion_fixer/aicte/book/";
-		$category = $("#fix-tbc-form #edit-category");
 		$book = $("#fix-tbc-form #edit-book");
 		$chapter = $("#fix-tbc-form #edit-chapter");
 		$example = $("#fix-tbc-form #edit-example");
 		$caption = $("#fix-tbc-form #edit-caption");
 		$code = $("#fix-tbc-form #edit-code");
-		$caption_form = $("#scilab-fixer-caption-form");
-		$code_form = $("#scilab-fixer-code-form");
+		$caption_form = $("#r-fixer-caption-form");
+		$code_form = $("#r-fixer-code-form");
 		$updating = $("#fix-tbc-page #updating");
 		$done = $("#fix-tbc-page #done");
 		$example.attr("multiple", "enabled");
@@ -46,7 +44,7 @@
 		$book.change(function() {
 			reset("chapter", "example", "caption");
 			var book_id = $(this).val();
-			if (book_id < 0) {
+			if (book_id < 1) {
 				$(".select-chapter").hide();
 				$(".select-example").hide();
 				$(".enter-caption").hide();
@@ -161,7 +159,7 @@
 					}
 					var chapter_caption = $("#edit-chapter-name").val();
 					chapter_caption = chapter_caption.trim();
-					chapter_caption = caption.replace(/\s\s+/g, ' ');
+					chapter_caption = chapter_caption.replace(/\s\s+/g, ' ');
 					if(validateCaption(chapter_caption) == true) {
 						alert('Enter valid text for chapter caption');
 						return false;
@@ -172,7 +170,7 @@
 					}
 					$updating.show();
 					$.ajax({
-						url: modPath + "ajax/update-both/",
+						url: modPath + "ajax/update-both/" + example_id,
 						type: "POST",
 						data: {
 							example_id: example_id,
@@ -207,11 +205,11 @@
 					}
 					$updating.show();
 					$.ajax({
-						url: modPath + "ajax/update-example/",
+						url: modPath + "ajax/update-example/" + example_id,
 						type: "POST",
 						data: {
 							example_id: example_id,
-							caption: caption
+							caption: caption,
 						},
 						dataType: "html",
 						success: function(data) {
@@ -227,8 +225,9 @@
 			} else if ($('.chapter-caption-chk').prop('checked') == true) {
 					if (chapter_id != "0") {
 					var chapter_caption = $("#edit-chapter-name").val();
+					alert(chapter_caption);
 					chapter_caption = chapter_caption.trim();
-					chapter_caption = caption.replace(/\s\s+/g, ' ');
+					chapter_caption = chapter_caption.replace(/\s\s+/g, ' ');
 					if(validateCaption(chapter_caption) == true) {
 						alert('Enter valid text for chapter caption');
 						return false;
@@ -239,7 +238,7 @@
 					}
 					$updating.show();
 					$.ajax({
-						url: modPath + "ajax/update-chapter/",
+						url: modPath + "ajax/update-chapter/" + example_id,
 						type: "POST",
 						data: {
 							chapter_id: chapter_id,
@@ -291,18 +290,7 @@
 			}
 			e.preventDefault();
 		});
-		$Selected = $(".selected");
-		$Selected.click(function(e) {
-			$(".sync-msg").remove();
-			$(this).after("<span class='sync-msg'>Saving...</span>");
-			$.ajax({
-				url: modPath1 + "ajax/selected/" + $(this).attr("data-bid"),
-				success: function() {
-					$(".sync-msg").remove();
-					console.log("success");
-				}
-			});
-		});
+
 		function validateCaption(text){
 			var re = /([a-zA-Z|*|_|.|+|-|\\|?|/|!|~|!|@|#|$|%|^|&|(|)|<|>|{|}|;|:|\"|\'|,])\1{2,}/;
 			return re.test(text);
