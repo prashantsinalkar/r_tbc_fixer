@@ -47,7 +47,7 @@ function get_proposal_status($proposal_value)
         $proposal_status = '';
         switch ($proposal_value) {
             case 0:
-                $proposal_status = "<span style='color:#FFFFFF'>Pending</span>";
+                $proposal_status = "<span style='color:#000000'>Pending</span>";
                 break;
             case 1:
                 $proposal_status = "<span style='color:#FF0000'>Approved</span>";
