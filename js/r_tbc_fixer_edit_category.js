@@ -125,6 +125,7 @@
 							data: {
 								pref_id: pref_id,
 								main_category: main_cat_chk_value,
+								sub_category: '',
 								action: action
 							},
 							dataType: "html",

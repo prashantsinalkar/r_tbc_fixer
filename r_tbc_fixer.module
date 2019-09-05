@@ -190,32 +190,7 @@ function R_fixer_ajax($item, $key)
 {
 	$data = "";
 	global $user;
-	if ($item == "category" && $key) {
-		/* $query = "
-		SELECT pre.id AS id, pre.book, pre.author FROM textbook_companion_preference pre
-		LEFT JOIN textbook_companion_proposal pro ON pro.id = pre.proposal_id
-		WHERE pro.proposal_status = 3 AND pre.approval_status = 1 AND pre.category = %d
-		ORDER BY pre.book ASC
-		";
-		$result = db_query($query, $key);*/
-		$query = db_select('textbook_companion_preference', 'pre');
-		$query->fields('pre', array(
-			'id',
-			'book',
-			'author'
-		));
-		$query->leftJoin('textbook_companion_proposal', 'pro', 'pro.id = pre.proposal_id');
-		$query->condition('pro.proposal_status', 3);
-		$query->condition('pre.approval_status', 1);
-		$query->condition('pre.category', $key);
-		$query->orderBy('pre.book', 'ASC');
-		$result = $query->execute();
-		$data .= "<option value='0'>Please select the book.</option>";
-		while ($row = $result->fetchObject()) {
-			$data .= "<option value='{$row->id}'>{$row->book} ({$row->author})</option>";
-		} //$row = $result->fetchObject()
-	} //$item == "category" && $key
-	else if ($item == "book" && $key) {
+	if ($item == "book" && $key) {
 		/*$query = "SELECT * FROM {textbook_companion_chapter} WHERE preference_id = %d ORDER BY number";
 		$result = db_query($query, $key);*/
 		$query = db_select('textbook_companion_chapter');
@@ -369,18 +344,6 @@ function R_fixer_ajax($item, $key)
 		file_put_contents($example_path, $code);
 		$data .= "updated";
 	} //$item == "code" && $key
-	else if ($item == "ind-ed" && $key) {
-		$query = "
-                UPDATE textbook_companion_aicte
-                SET ind = !ind
-                WHERE id = :id
-            ";
-		$args = array(
-			":id" => $key
-		);
-		db_query($query, $args);
-		$data .= "updated";
-	} //$item == "ind-ed" && $key
 	else {
 		$data = "<option value='0'>Please select a book</option>";
 	}
@@ -448,17 +411,22 @@ function R_fixer_code_all()
 }
 
 function r_get_tbc_books(){
-    $query = "
+	$query = "
 		SELECT pre.id AS id, pre.book, pre.author FROM textbook_companion_preference pre
 		LEFT JOIN textbook_companion_proposal pro ON pro.id = pre.proposal_id
 		WHERE pro.proposal_status = 3 AND pre.approval_status = 1
 		ORDER BY pre.book ASC
 		";
 	$book_list = db_query($query);
+	$i = 1;
 	$book[0] = "Select any book";
-    while ($book_list_data = $book_list->fetchObject())
+	while ($book_list_data = $book_list->fetchObject())
 	{
-		$book[$book_list_data->id] .= $book_list_data->book ." (by " .$book_list_data->author. ")";
+		if (!isset($book[$book_list_data->id])) {
+				$book[$book_list_data->id] = '';
+		}
+		$book[$book_list_data->id] = $book[$book_list_data->id] . $i . ") ". $book_list_data->book . " (by " . $book_list_data->author . ")";
+		$i++;
 	} 
 	return $book;
 }
