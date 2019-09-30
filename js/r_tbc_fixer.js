@@ -127,10 +127,10 @@
 				type: "POST",
 				dataType: "html",
 				success: function(data) {
-					var code = $(data).filter("#code").html();
+					var code = $(data).filter("#code").text();
 					/* checking whether it is for .well or textarea */
 					if ($code.hasClass("fix-caption-code")) {
-						$code.html(code);
+						$code.text(code);
 					} else {
 						$code.val(code);
 					}
