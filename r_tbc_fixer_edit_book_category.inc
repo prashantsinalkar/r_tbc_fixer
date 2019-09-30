@@ -2,20 +2,21 @@
 function r_tbc_fixer_edit_book_proposal_all()
 {
 	//get the book count
-	$result = db_query("SELECT COUNT( pe.book ) AS book_count FROM {textbook_companion_preference} pe LEFT JOIN {textbook_companion_proposal} po ON pe.proposal_id = po.id WHERE pe.approval_status =1 ");
+	$result = db_query("SELECT COUNT( pe.book ) AS book_count FROM {textbook_companion_preference} pe INNER JOIN {textbook_companion_proposal} po ON pe.proposal_id = po.id");
 	$row = $result->fetchObject();
 	$book_count = $row->book_count;
 	$i = 1;
 	/* get preference */
 	$preference_q = db_query("SELECT pe.id as pref_id, pe.book as book, pe.author as author, pe.publisher as publisher, pe.year as year, pe.id as pe_id, po.approval_date as approval_date, po.proposal_status
-  FROM {textbook_companion_preference} pe LEFT JOIN {textbook_companion_proposal} po ON pe.proposal_id = po.id
-  WHERE pe.approval_status = 1 ORDER BY po.proposal_status ASC");
+  FROM {textbook_companion_preference} pe INNER JOIN {textbook_companion_proposal} po ON pe.proposal_id = po.id
+  ORDER BY po.proposal_status ASC");
 	while ($preference_data = $preference_q->fetchObject())
 	{
 		$proposal_rows[] = array(
 			$i,
 			"{$preference_data->book} <br> <em>by {$preference_data->author}</em>",
-			 get_proposal_status($preference_data->proposal_status),
+			get_proposal_status($preference_data->proposal_status),
+			_user_proposal_selected_category($preference_data->pref_id),
 			_tbc_fixer_list_of_new_category($preference_data->pref_id),
 			l('Edit', 'r_tbc_fixer/category_edit/' . $preference_data->pref_id)
 		);
@@ -32,6 +33,7 @@ function r_tbc_fixer_edit_book_proposal_all()
 		'No.',
 		'Title of the Book',
 		'Proposal Status',
+		'User selected category',
 		'Current Category',
 		'Action'
 	);
@@ -285,11 +287,11 @@ function _r_tbc_fixer_list_of_category($category_id)
 	$category .= "";
 	$query = db_select('list_of_category');
 	$query->fields('list_of_category');
-	$query->condition('id', $category_id);
+	$query->condition('category_id', $category_id);
 	$category_list = $query->execute();
 	while ($category_list_data = $category_list->fetchObject())
 	{
-		$category = $category_list_data->category_name;
+		$category = $category_list_data->maincategory;
 	} //$category_list_data = $category_list->fetchObject()
 	return $category;
 }
@@ -299,8 +301,8 @@ function _tbc_fixer_list_of_new_category($pref_id)
 	$main_category_query = "
                 SELECT  distinct(maincategory)
                 FROM {list_of_category} loc 
-                LEFT JOIN {textbook_companion_book_main_subcategories} tcbms ON loc.category_id = tcbms.main_category
-                LEFT JOIN  {list_of_subcategory} los ON los.subcategory_id = tcbms.sub_category
+                INNER JOIN {textbook_companion_book_main_subcategories} tcbms ON loc.category_id = tcbms.main_category
+                INNER JOIN  {list_of_subcategory} los ON los.subcategory_id = tcbms.sub_category
                 WHERE tcbms.pref_id = :pref_id ORDER BY loc.category_id
                 ";
 	$args = array(
@@ -314,9 +316,9 @@ function _tbc_fixer_list_of_new_category($pref_id)
 		$sub_category_query = "
                 SELECT DISTINCT (los.subcategory)
                 FROM {list_of_category} loc 
-                LEFT JOIN {textbook_companion_book_main_subcategories} tcbms ON loc.category_id = tcbms.main_category
-                LEFT JOIN  {list_of_subcategory} los ON los.subcategory_id = tcbms.sub_category
-                WHERE tcbms.pref_id = :pref_id and maincategory = :maincategoryvalue
+                INNER JOIN {textbook_companion_book_main_subcategories} tcbms ON loc.category_id = tcbms.main_category
+                INNER JOIN  {list_of_subcategory} los ON los.subcategory_id = tcbms.sub_category
+                WHERE tcbms.pref_id = :pref_id AND maincategory = :maincategoryvalue
                 ";
 		$sub_args = array(
 			':pref_id' => $pref_id,
@@ -339,7 +341,7 @@ function _tbc_fixer_list_of_ext_new_category($pref_id, $category_id)
                 FROM {list_of_category} loc 
                 LEFT JOIN {textbook_companion_book_main_subcategories} tcbms 
                 ON loc.category_id = tcbms.main_category 
-                LEFT JOIN  {list_of_subcategory} los ON los.subcategory_id = tcbms.sub_category
+                LEFT JOIN {list_of_subcategory} los ON los.subcategory_id = tcbms.sub_category
                 WHERE tcbms.pref_id = :pref_id AND loc.category_id = :category_id
                 ";
 	$args = array(
@@ -433,4 +435,21 @@ function _tbc_fixer_list_of_ext_new_subcategory($pref_id, $category_id)
 		$subcategory .= "<option value='" . $subcategory_list_data->subcat_id . "' data-name='" . $subcategory_list_data->subcategory . "' data-mcid='" . $category_id . "'>" . $subcategory_list_data->subcategory . "</option>";
 	} //$category_list_data = $category_list->fetchObject()
 	return $subcategory;
+}
+function _user_proposal_selected_category($pref_id)
+{
+    $query = "
+            SELECT  loc.maincategory
+            FROM list_of_category loc
+            JOIN textbook_companion_preference tcp
+            ON  loc.category_id = tcp.category
+            WHERE tcp.id = :pref_id
+            ";
+    $args = array(
+        ':pref_id' => $pref_id,
+    );
+    $category_list = db_query($query, $args);
+    $category_list_data = $category_list->fetchObject();
+    $category = $category_list_data->maincategory;
+    return $category;
 }
